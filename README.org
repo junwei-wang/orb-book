@@ -1,0 +1,38 @@
+# orb-book
+* ORB-BOOK
+
+*Orb-book* is a book manager for Emacs empowered by [[https://github.com/org-roam/org-roam][org-roam]], [[https://github.com/org-roam/org-roam-bibtex][org-roam-bibtex]] and [[https://github.com/tmalsburg/helm-bibtex][helm-bibtex]].
+
+-----
+
+** Screenshots
+
+*** Searching booking
+[[./screenshots/orb-book-find-helm.png]]
+
+*** Helm action of a book entry
+
+[[./screenshots/orb-book-helm-action.png]]
+
+*** Open a book
+
+[[./screenshots/orb-book-open-pdf.png]]
+
+
+** Usage
+
+*** Add a book
+
+This project is in its very early stage, a book add functionality hasn't been implemented.
+
+However, one can add a book to the database manually by following the  following steps:
+
+1. Add a bib entry to your *.bib file.
+2. Add a org-roam-bibtex note for this bib entry.
+3. Add tag `book` for this note by updating the FILETAGS property.
+
+In the future, this process will be automated in this project.
+
+*** Search a book
+
+Simply execute =M-x orb-book-find-helm=.
