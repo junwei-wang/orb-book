@@ -81,8 +81,10 @@ A book org-roam node is a node generated dy org-roam-bibtex and having a tag
                       (t raw-edition)))
             (isbn (bibtex-completion-get-value "isbn" bib-entry))
             (series (bibtex-completion-get-value "series" bib-entry))
-            (url (bibtex-completion-get-value "url" bib-entry)))
-       (list ref title long-authors short-authors year publisher edition series isbn url)))
+            (url (bibtex-completion-get-value "url" bib-entry))
+            (has-pdf (bibtex-completion-get-value "=has-pdf=" bib-entry))
+            )
+       (list ref title long-authors short-authors year publisher edition series isbn url has-pdf)))
    (orb-book--all-refs)))
 
 (defun orb-book-query-to-alist (item)
@@ -98,7 +100,8 @@ ITEM is an entry in the query result."
       (:edition       ,(nth 6 item))
       (:series        ,(nth 7 item))
       (:isbn          ,(nth 8 item))
-      (:url           ,(nth 9 item)))))
+      (:url           ,(nth 9 item))
+      (:has-pdf       ,(nth 10 item)))))
 
 (defun orb-book-format-column (string width &optional right-align)
   "Return STRING truncated or padded to WIDTH.
@@ -119,13 +122,15 @@ Argument BOOK-ALIST."
         (short-authors (orb-book-getattr book-alist :short-authors))
         (year (orb-book-getattr book-alist :year))
         (edition (orb-book-getattr book-alist :edition))
-        (publisher (orb-book-getattr book-alist :publisher)))
+        (publisher (orb-book-getattr book-alist :publisher))
+        (has-pdf (orb-book-getattr book-alist :has-pdf)))
     (format
-     "%s  %s  %s  %s  %s"
+     "%s  %s  %s  %s  %s %s"
+     (orb-book-format-column has-pdf 1)
      (orb-book-format-column short-authors 20)
      (orb-book-format-column year 4 t)
      (orb-book-format-column title 80)
-     (orb-book-format-column edition 2 t)
+     (orb-book-format-column edition 4 t)
      (orb-book-format-column publisher 30))))
 
 (defun orb-book-get-list-for-display (item-list)
