@@ -50,16 +50,25 @@
   "Get the references for all org-roam nodes for books.
 A book org-roam node is a node generated dy org-roam-bibtex and having a tag
 \"book\" or \"BOOK\" or \"Book\"."
-  (org-roam-db-query [:select [ref]
+  (org-roam-db-query [:select [tags:node_id, ref]
                       :from tags
                       :join refs :on (= tags:node_id refs:node_id)
                       :where (in tag ["book" "BOOK" "Book"])]))
 
+(defun orb-book-query-book-tags (node-id)
+  "Query the tags of a book with NODE-ID."
+  (mapcar 'car
+          (org-roam-db-query [:select tag :from tags
+                              :where (= node_id $s1)
+                              :and (not-in tag ["book" "BOOK" "Book"])]
+                             node-id)))
+
 (defun orb-book-query ()
   "Query books' information from bibtex."
   (mapcar
-   (lambda(ref)
-     (let* ((ref (car ref))
+   (lambda(entry)
+     (let* ((node-id (nth 0 entry))
+            (ref (nth 1 entry))
             (bib-entry (bibtex-completion-get-entry ref))
             (title (bibtex-completion-get-value "title" bib-entry))
             (long-authors (or (bibtex-completion-get-value "author" bib-entry)
@@ -76,15 +85,15 @@ A book org-roam node is a node generated dy org-roam-bibtex and having a tag
                        (cond ((string= "Second" raw-edition) 2)
                              ((string-match "[1-9]" raw-edition)
                               (string-to-number
-                               (match-string (string-match "[1-9]" raw-edition) raw-edition)))
+                               (match-string (string-match "[1-9][0-9]*" raw-edition) raw-edition)))
                              (t raw-edition "x")))
                       (t raw-edition)))
             (isbn (bibtex-completion-get-value "isbn" bib-entry))
             (series (bibtex-completion-get-value "series" bib-entry))
             (url (bibtex-completion-get-value "url" bib-entry))
             (has-pdf (bibtex-completion-get-value "=has-pdf=" bib-entry))
-            )
-       (list ref title long-authors short-authors year publisher edition series isbn url has-pdf)))
+            (tags (orb-book-query-book-tags node-id)))
+       (list ref title long-authors short-authors year publisher edition series isbn url has-pdf tags)))
    (orb-book--all-refs)))
 
 (defun orb-book-query-to-alist (item)
@@ -101,7 +110,8 @@ ITEM is an entry in the query result."
       (:series        ,(nth 7 item))
       (:isbn          ,(nth 8 item))
       (:url           ,(nth 9 item))
-      (:has-pdf       ,(nth 10 item)))))
+      (:has-pdf       ,(nth 10 item))
+      (:tags          ,(nth 11 item)))))
 
 (defun orb-book-format-column (string width &optional right-align)
   "Return STRING truncated or padded to WIDTH.
@@ -123,15 +133,17 @@ Argument BOOK-ALIST."
         (year (orb-book-getattr book-alist :year))
         (edition (orb-book-getattr book-alist :edition))
         (publisher (orb-book-getattr book-alist :publisher))
-        (has-pdf (orb-book-getattr book-alist :has-pdf)))
+        (has-pdf (orb-book-getattr book-alist :has-pdf))
+        (tags (orb-book-getattr book-alist :tags)))
     (format
-     "%s  %s  %s  %s  %s %s"
+     "%s  %s  %s  %s  %s %s %s"
      (orb-book-format-column has-pdf 1)
      (orb-book-format-column short-authors 20)
      (orb-book-format-column year 4 t)
      (orb-book-format-column title 80)
      (orb-book-format-column edition 4 t)
-     (orb-book-format-column publisher 30))))
+     (orb-book-format-column publisher 30)
+     (orb-book-format-column tags 30))))
 
 (defun orb-book-get-list-for-display (item-list)
   "Get book list for display in helm from orb-book ITEM-LIST."
