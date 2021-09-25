@@ -86,7 +86,7 @@ A book org-roam node is a node generated dy org-roam-bibtex and having a tag
                              ((string-match "[1-9]" raw-edition)
                               (string-to-number
                                (match-string (string-match "[1-9][0-9]*" raw-edition) raw-edition)))
-                             (t raw-edition "x")))
+                             (t raw-edition)))
                       (t raw-edition)))
             (isbn (bibtex-completion-get-value "isbn" bib-entry))
             (series (bibtex-completion-get-value "series" bib-entry))
@@ -119,7 +119,7 @@ Argument RIGHT-ALIGN."
   (cond ((< width 0) string)
         ((= width 0) "")
         (t (format (format "%%%s%d.%ds" (if right-align "" "-") width width)
-                   string))))
+                   (or string "")))))
 
 (defun orb-book-getattr (my-alist key)
   "Get the associated attribute for KEY in MY-ALIST."
