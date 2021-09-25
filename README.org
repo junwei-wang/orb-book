@@ -25,11 +25,11 @@
 
 This project is in its very early stage, a book add functionality hasn't been implemented.
 
-However, one can add a book to the database manually by following the  following steps:
+However, one can add a book to the database manually by following the following three steps:
 
 1. Add a bib entry to your *.bib file.
 2. Add a org-roam-bibtex note for this bib entry.
-3. Add tag `book` for this note by updating the FILETAGS property.
+3. Add tag =book= for this note by updating its =FILETAGS= property.
 
 In the future, this process will be automated in this project.
 
