@@ -35,7 +35,8 @@
 (defcustom orb-book-helm-actions
   (if (fboundp 'helm-make-actions)
       (helm-make-actions
-       "Open file"                   'orb-book-open-pdf
+       "Open PDF file"               'orb-book-open-pdf
+       "Attach PDF file"             'orb-book-add-pdf
        "View details"                'orb-book-show-entry))
   "Default actions for orb-book helm."
   :group 'orb-book
@@ -146,6 +147,11 @@ Argument BOOK-ALIST."
   "Open associated pdf file for the book ENTRY."
   (let ((ref (orb-book-getattr (car entry) :ref)))
     (bibtex-completion-open-pdf (list ref))))
+
+(defun orb-book-add-pdf (entry)
+  "Open associated pdf file for the book ENTRY."
+  (let ((ref (orb-book-getattr (car entry) :ref)))
+    (bibtex-completion-add-pdf-to-library (list ref))))
 
 ;; ============================================================================
 ;;;; Orb book helm search
