@@ -27,7 +27,7 @@ This project is in its very early stage, a book add functionality hasn't been im
 
 However, one can add a book to the database manually by following the following three steps:
 
-1. Add a bib entry to your *.bib file.
+1. Add a bib entry to your *.bib file via =M-x orb-book-add-book=.
 2. Add a org-roam-bibtex note for this bib entry.
 3. Add tag =book= for this note by updating its =FILETAGS= property.
 
