@@ -42,6 +42,12 @@
   :group 'orb-book
   :type '(alist :key-type string :value-type function))
 
+(defcustom orb-book-bibliography nil
+  "Bib file for inserting new books by orb-book.
+This file should be added to variable `bibtex-completion-bibliography'"
+  :group 'orb-book
+  :type '(string))
+
 ;; ============================================================================
 ;;;; Orb book query books, and process them
 ;; ============================================================================
@@ -172,6 +178,8 @@ Argument BOOK-ALIST."
 
 ;; ============================================================================
 ;;;; Orb book helm search
+;; ============================================================================
+
 (defun orb-book-helm-read ()
   "Helm read for orb-book."
   (when (fboundp 'helm)
@@ -188,6 +196,81 @@ Argument BOOK-ALIST."
   "Use helm to list all book details."
   (interactive)
   (orb-book-helm-read))
+
+;; ============================================================================
+;;;; Add new book
+;; ============================================================================
+
+
+(defun orb-book-copy-add-book-buffer ()
+  "Copy the new book entry to the corresponding bib file."
+  (interactive)
+  ;; kill all comments, then format the buffer,
+  ;; then append the bib entry to bib file
+  (goto-char 0)
+  (comment-kill (count-lines (point-min) (point-max)))
+  (bibtex-reformat)
+  (append-to-file (point-min) (point-max) orb-book-bibliography)
+  (message "book entry has been added to `%s'" orb-book-bibliography)
+  (kill-current-buffer)
+
+  ;; TODO get the ref key of the bib entry
+  ;;
+  ;; TODO test whether note already exist
+  ;; (let ((bib-buffer-name (buffer-name)))
+  ;;   (save-excursion
+  ;;     ;; create org-roam-bibtex node
+  ;;     ;; FIXME: no ROAM_REFS is created
+  ;;     (orb-bibtex-completion-edit-note
+  ;;      (list (read-string "Enter the bib ref key (e.g. \"BOOK:Knuth1997:AOCP2\"): ")))
+  ;;    (kill-buffer bib-buffer-name)
+  ;;    )
+  )
+
+(defun orb-book-add-book-quit ()
+  "Quit the buffer in `orb-book-add-book-mode'."
+  (interactive)
+  (kill-current-buffer))
+
+
+(defvar orb-book-add-book-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "\C-c\C-k" 'orb-book-add-book-quit)
+    (define-key map "\C-c\C-c" 'orb-book-copy-add-book-buffer)
+    map)
+  "Keymap for `orb-book-add-book-mode'.")
+
+(define-derived-mode orb-book-add-book-mode
+  bibtex-mode "orb-book add book"
+  "Major mode for org-book add book.")
+
+(defun orb-book-add-book ()
+  "Add a new book to orb-book."
+  (interactive)
+  (unless orb-book-bibliography
+    (error "`orb-book-bibliography' is not set"))
+  (switch-to-buffer (make-temp-name "*orb-book-new-book*"))
+  (insert "\n\n"
+          "@Comment please insert your bibtex bib entry above.\n"
+          "@Comment\n"
+          "@Comment press C-c C-c to finish\n"
+          "@Comment press C-c C-k to quit\n"
+          "@Comment\n"
+          "@Comment for example:\n"
+          "@Comment\n"
+          "@Comment @book{BOOK:Knuth1997:AOCP2,\n"
+          "@Comment title =     {The art of computer programming. Vol.2. Seminumerical algorithms},\n"
+          "@Comment author =    {Knuth, Donald E},\n"
+          "@Comment publisher = {Addison-Wesley Professional},\n"
+          "@Comment isbn =      {0-201-89684-2,978-0-201-89684-8,978-0-201-89683-1,0201896834,978-0-201-89685-5,0201896850,978-0-201-03804-0},\n"
+          "@Comment year =      {1997},\n"
+          "@Comment series =    {},\n"
+          "@Comment edition =   {3ed.},\n"
+          "@Comment volume =    {},\n"
+          "@Comment url =       {https://www-cs-faculty.stanford.edu/~knuth/taocp.html}\n"
+          "@Comment }\n")
+  (goto-char 0)
+  (orb-book-add-book-mode))
 
 (provide 'orb-book)
 ;;; orb-book.el ends here
